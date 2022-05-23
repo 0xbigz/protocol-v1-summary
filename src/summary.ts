@@ -452,13 +452,17 @@ const getSummary = async (
 		result.push(marketDesc);
 	}
 
+	const insuranceVault = 99257.560977;
 	const collateralVaultPlusInsuranceVaultBalance = 4937519.836505;
+	const collateralVault = 4838262.27553;
 	const aggDesc = {
 		marketSymbol: 'ALL',
 		totalNetQuoteOI: allQuoteAcq,
 		totalLongQuoteOI: allQuoteAcqLong,
 		totalShortQuoteOI: allQuoteAcqShort,
 		totalQuoteOI: allQuoteAcqLong + allQuoteAcqShort,
+		collateralVault,
+		insuranceVault,
 		collateralVaultPlusInsuranceVaultBalance,
 		totalUserCollateral: totalUserCollateral,
 		totalUserCollateralTerminal: totalUserCollateral + totalPnl1,
