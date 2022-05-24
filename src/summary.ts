@@ -131,13 +131,13 @@ const getSummary = async (
 		}
 	}
 
-	let userCollateralSum = 0;
+	let userRealiseCollateralLocal = 0;
 	let localUserPnl = 0; // cur @ local
 	let terminalUserPnl1 = 0; // net @ terminal
 	let terminalUserPnl2 = 0; //  net @ terminal (two swap)
 
 	for (const programUserAccount of programUserAccounts) {
-		userCollateralSum += convertToNumber(
+		userRealiseCollateralLocal += convertToNumber(
 			// @ts-ignore
 			programUserAccount.account.collateral,
 			QUOTE_PRECISION
@@ -336,6 +336,7 @@ const getSummary = async (
 			terminalPnl2: roundDecimal(terminalUserPositionPnl2),
 			// local pnl
 			localPnl: roundDecimal(localUserPositionPnl),
+			pnlDivergence: roundDecimal(localUserPositionPnl - terminalUserPositionPnlNum),
 
 			exitPrice: convertToNumber(exitPrice, QUOTE_PRECISION),
 			terminalPrice: roundDecimal(
@@ -375,6 +376,8 @@ const getSummary = async (
 	const insuranceVault = 99257.560977;
 	const collateralVaultPlusInsuranceVaultBalance = 4937519.836505;
 	const collateralVault = 4838262.27553;
+	const userRealisedCollateralTerminal1 = userRealiseCollateralLocal + terminalUserPnl1;
+	const totalUserCollateralLocal = userRealiseCollateralLocal + localUserPnl;
 	const aggDesc = {
 		marketSymbol: 'ALL',
 		totalNetQuoteOI: allQuoteAcq,
@@ -384,14 +387,14 @@ const getSummary = async (
 		collateralVault,
 		insuranceVault,
 		collateralVaultPlusInsuranceVaultBalance,
-		userCollateralSum,
-		totalUserCollateralTerminal: userCollateralSum + terminalUserPnl1,
-		totalUserCollateralTerminal2: userCollateralSum + terminalUserPnl2,
-		totalUserCollateralLocal: userCollateralSum + localUserPnl,
-		allTotalFee: allTotalFee,
-		allTotalFeeMinusDistributions: allTotalFeeMinusDistributions,
-		systemSurplus:
-			collateralVaultPlusInsuranceVaultBalance - (userCollateralSum + terminalUserPnl1 + allTotalFeeMinusDistributions),
+		userRealiseCollateralLocal,
+		userRealisedCollateralTerminal1,
+		userRealisedCollateralTerminal2: userRealiseCollateralLocal + terminalUserPnl2,
+		totalUserCollateralLocal,
+		leveredLoss:
+			collateralVaultPlusInsuranceVaultBalance - (userRealiseCollateralLocal + terminalUserPnl1),
+		realisedCollateralShortfall: userRealiseCollateralLocal - collateralVaultPlusInsuranceVaultBalance,
+		totalPnlDivergence: totalUserCollateralLocal - userRealisedCollateralTerminal1,
 	};
 
 	result.push(aggDesc);
